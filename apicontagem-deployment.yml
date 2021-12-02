@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: apicontagem 
+spec:
+  selector:
+    matchLabels:
+      app: apicontagem
+  replicas: 10
+  template:
+    metadata:
+      labels:
+        app: apicontagem 
+    spec:
+      containers:
+        - name: apicontagem 
+          image: renatogroffe/apicontagem-kafka-dotnet6:1
+          ports:
+          - containerPort: 80
+          env:
+          - name: ApacheKafka__Topic
+            value: topic-contagem
+          - name: ApacheKafka__Host
+            valueFrom:
+              secretKeyRef:
+                name: workercontagemsecret
+                key: HostKafka
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: apicontagem
+spec:
+    type: LoadBalancer
+    ports:
+    - port: 80 
+    selector:
+        app: apicontagem
